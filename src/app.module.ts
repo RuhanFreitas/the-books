@@ -1,11 +1,25 @@
-import { Module } from '@nestjs/common';
-import { AdminController } from './admin/admin.controller';
-import { AdminModule } from './admin/admin.module';
-import { ReviewModule } from './review/review.module';
+import { Module } from '@nestjs/common'
+import { AdminModule } from './admin/admin.module'
+import { ReviewModule } from './review/review.module'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { ConfigModule } from '@nestjs/config'
 
 @Module({
-  imports: [AdminModule, ReviewModule],
-  controllers: [AdminController],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      synchronize: true,
+      autoLoadEntities: true,
+    }),
+    AdminModule,
+    ReviewModule,
+  ],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}
