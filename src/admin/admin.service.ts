@@ -1,35 +1,59 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Admin } from './entities/admin.entity';
+  import { ConflictException, Injectable } from '@nestjs/common';
+  import { CreateAdminDto } from './dto/create-admin.dto';
+  import { InjectRepository } from '@nestjs/typeorm';
+  import { Repository } from 'typeorm';
+  import { Admin } from './entities/admin.entity';
+  import { HashingService } from 'src/common/hashing/hashing.service';
 
-@Injectable()
-export class AdminService {
+  @Injectable()
+  export class AdminService {
 
-    constructor(
-      @InjectRepository(Admin)
-      private readonly adminRepository: Repository<Admin>
-    ) {}
+      constructor(
+        @InjectRepository(Admin)
+        private readonly adminRepository: Repository<Admin>,
+        private readonly hashingService: HashingService
+      ) {}
 
-    create(createAdminDto: CreateAdminDto) {
-      return 'This action adds a new admin';
-    }
+      async create(createAdminDto: CreateAdminDto) {
 
-    findAll() {
-      return `This action returns all admin`;
-    }
+        const userExists = await this.findOneByEmail(createAdminDto.email)
 
-    findOne(id: number) {
-      return `This action returns a #${id} admin`;
-    }
+        if (userExists) {
+          throw new ConflictException('This email can\'t  be used.')
+        }
 
-    update(id: number, updateAdminDto: UpdateAdminDto) {
-      return `This action updates a #${id} admin`;
-    }
+        const hashedPassword = await this.hashingService.hash(createAdminDto.password)
 
-    remove(id: number) {
-      return `This action removes a #${id} admin`;
-    }
-}
+        const newAdmin = {
+          ...createAdminDto,
+          password: hashedPassword
+        }
+
+        let admin = this.adminRepository.create(newAdmin)
+
+        admin = await this.adminRepository.save(admin)
+
+        return admin
+      }
+
+      async findOneByEmail(email: string) {
+        const admin = await this.adminRepository.findOne({ where: { email } })
+
+        if (!admin) {
+          throw new ConflictException('Admin not found.')
+        }
+
+        return admin
+      }
+
+      async findOne(id: string) {
+        const admin = await this.adminRepository.findOne({ where: { id } })
+
+        if (!admin) {
+          throw new ConflictException('You\' done something wrong.')
+        }
+
+        return admin
+      }
+
+  }
