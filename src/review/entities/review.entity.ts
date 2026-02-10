@@ -12,7 +12,12 @@ export class Review {
     @Column()
     category: string
 
-    @ManyToOne(() => Admin)
+    @Column()
+    content: string
+
+    @ManyToOne(() => Admin, (admin) => admin.reviews, {
+        nullable: false
+    })
     author: Admin
 
     @CreateDateColumn()

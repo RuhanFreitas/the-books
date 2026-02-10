@@ -45,7 +45,7 @@
 
         return admin
       }
-
+      
       async findOne(id: string) {
         const admin = await this.adminRepository.findOne({ where: { id } })
 

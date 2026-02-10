@@ -1,26 +1,80 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { UpdateReviewDto } from './dto/update-review.dto'
+import { Repository } from 'typeorm';
+import { Review } from './entities/review.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AuthenticatedRequest } from 'src/auth/types/authenticated-request.type';
 
 @Injectable()
 export class ReviewService {
-  create(createReviewDto: CreateReviewDto) {
-    return 'This action adds a new review';
+  constructor(
+    @InjectRepository(Review)
+    private readonly reviewRepository: Repository<Review>
+  ) {}
+
+  async create(createReviewDto: CreateReviewDto, req: AuthenticatedRequest): Promise<Review> {
+    let data = { ...createReviewDto, author: { id: req.user.id } }
+
+    const review = this.reviewRepository.create(data)
+
+    const savedReview = await this.reviewRepository.save(review)
+
+    const reviewWithAuthorData = await this.reviewRepository.findOne({
+      where: { id: savedReview.id },
+      relations: ['author']
+    })
+
+    if (!reviewWithAuthorData) {
+      throw new InternalServerErrorException('Review couldn\'t be found.')
+    }
+
+    return reviewWithAuthorData
   }
 
-  findAll() {
-    return `This action returns all review`;
+  async findAll(): Promise<Review[]> {
+    const data = await this.reviewRepository.find({
+      relations: ['author']
+    })
+
+    if (!data) {
+      throw new InternalServerErrorException('Reviews couldn\'t be retrieved.')
+    }
+
+    return data
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} review`;
+  async findOne(id: string): Promise<Review> {
+    const data = await this.reviewRepository.findOne({ where: { id }})
+
+    if (!data) {
+      throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+    }
+
+    return data
   }
 
-  update(id: number, updateReviewDto: UpdateReviewDto) {
-    return `This action updates a #${id} review`;
+  async update(id: string, updateReviewDto: UpdateReviewDto): Promise<Review> {
+    const review = await this.reviewRepository.findOne({ where: { id }})
+
+     if (!review) {
+      throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+    }
+
+    Object.assign(review, updateReviewDto)
+
+    return this.reviewRepository.save(review)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} review`;
+  async remove(id: string): Promise<Review> {
+    const review = await this.reviewRepository.findOne({ where: { id } })
+
+    if (!review) {
+      throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+    }
+
+    await this.reviewRepository.remove(review)
+
+    return review
   }
 }
