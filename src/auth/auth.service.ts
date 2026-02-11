@@ -10,7 +10,6 @@ export class AuthService {
   constructor(
     private readonly hashingService: HashingService,
     private readonly adminService: AdminService,
-    private readonly authService: AuthService,
     private readonly jwtService: JwtService
   ) {}
   
@@ -33,8 +32,8 @@ export class AuthService {
   }
 
   async login(loginAuthDto: LoginAuthDto) {
-    this.authService.validateAdmin(loginAuthDto)
-    this.authService.validatePassword(loginAuthDto.email, loginAuthDto.password)
+    this.validateAdmin(loginAuthDto)
+    this.validatePassword(loginAuthDto.email, loginAuthDto.password)
 
     const admin = await this.adminService.findOneByEmail(loginAuthDto.email)
 
@@ -51,7 +50,7 @@ export class AuthService {
     const payload = { sub: admin.id, email: admin.email }
 
     return {
-      acessToken: await this.jwtService.signAsync(payload)
+      accessToken: await this.jwtService.signAsync(payload)
     }
   }
 }

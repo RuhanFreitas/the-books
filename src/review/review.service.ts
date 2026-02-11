@@ -5,16 +5,22 @@ import { Repository } from 'typeorm';
 import { Review } from './entities/review.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticatedRequest } from 'src/auth/types/authenticated-request.type';
+import { SanitizerService } from 'src/common/sanitizer/sanitizer.service';
 
 @Injectable()
 export class ReviewService {
   constructor(
     @InjectRepository(Review)
-    private readonly reviewRepository: Repository<Review>
+    private readonly reviewRepository: Repository<Review>,
+    private readonly sanitizerService: SanitizerService
   ) {}
 
   async create(createReviewDto: CreateReviewDto, req: AuthenticatedRequest): Promise<Review> {
     let data = { ...createReviewDto, author: { id: req.user.id } }
+
+    const cleanContent = this.sanitizerService.clean(data.content)
+
+    data = { ...createReviewDto, author: { id: req.user.id }, content: cleanContent }
 
     const review = this.reviewRepository.create(data)
 

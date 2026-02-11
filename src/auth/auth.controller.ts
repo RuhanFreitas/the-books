@@ -14,14 +14,14 @@ export class AuthController {
   async login(@Body() loginAuthDto: LoginAuthDto) {
     const jwt_token = await this.authService.login(loginAuthDto)
 
-    return new AuthResponseDto(jwt_token.access_token)
+    return new AuthResponseDto(jwt_token.accessToken)
   }
 
   @Post('/register')
   async register(@Body() registerAuthDo: RegisterAuthDto) {
     const jwt_token = await this.authService.register(registerAuthDo)
 
-    return new AuthResponseDto(jwt_token.acess_token)
+    return new AuthResponseDto(jwt_token.accessToken)
   }
 
 }
