@@ -15,8 +15,9 @@
       ) {}
 
       async create(createAdminDto: CreateAdminDto) {
+        const email = createAdminDto.email
 
-        const userExists = await this.findOneByEmail(createAdminDto.email)
+        const userExists = await this.adminRepository.findOne({ where: { email } })
 
         if (userExists) {
           throw new ConflictException('This email can\'t  be used.')

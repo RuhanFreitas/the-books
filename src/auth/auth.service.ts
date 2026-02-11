@@ -13,29 +13,21 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
   
-  async validateAdmin(loginAuthDto: LoginAuthDto) {
+  async login(loginAuthDto: LoginAuthDto) {
     const admin = await this.adminService.findOneByEmail(loginAuthDto.email)
 
     if (!admin) {
-      throw new NotFoundException('Oops... someone wants to became an admin.')
+      throw new NotFoundException('Admin not found.')
     }
-  }
 
-  async validatePassword(email: string, password: string) {
-    const admin = await this.adminService.findOneByEmail(email)
-
-    const isValid = this.hashingService.compare(password, admin.password)
+    const isValid = await this.hashingService.compare(
+      loginAuthDto.password,
+      admin.password
+    )
 
     if (!isValid) {
-      throw new BadRequestException('You have provived something wrong.')
+      throw new BadRequestException('Invalid credentials.')
     }
-  }
-
-  async login(loginAuthDto: LoginAuthDto) {
-    this.validateAdmin(loginAuthDto)
-    this.validatePassword(loginAuthDto.email, loginAuthDto.password)
-
-    const admin = await this.adminService.findOneByEmail(loginAuthDto.email)
 
     const payload = { sub: admin.id, email: admin.email }
 
