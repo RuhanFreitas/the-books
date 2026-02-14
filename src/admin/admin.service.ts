@@ -1,4 +1,4 @@
-  import { ConflictException, Injectable } from '@nestjs/common';
+  import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
   import { CreateAdminDto } from './dto/create-admin.dto';
   import { InjectRepository } from '@nestjs/typeorm';
   import { Repository } from 'typeorm';
@@ -41,7 +41,7 @@
         const admin = await this.adminRepository.findOne({ where: { email } })
 
         if (!admin) {
-          throw new ConflictException('Admin not found.')
+          throw new NotFoundException('Admin not found.')
         }
 
         return admin

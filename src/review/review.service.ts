@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common'
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { UpdateReviewDto } from './dto/update-review.dto'
 import { Repository } from 'typeorm';
@@ -6,7 +6,6 @@ import { Review } from './entities/review.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticatedRequest } from 'src/auth/types/authenticated-request.type';
 import { SanitizerService } from 'src/common/sanitizer/sanitizer.service';
-import { Admin } from 'src/admin/entities/admin.entity';
 
 @Injectable()
 export class ReviewService {
@@ -17,13 +16,15 @@ export class ReviewService {
   ) {}
 
   async create(createReviewDto: CreateReviewDto, req: AuthenticatedRequest): Promise<Review> {
-    let data = { ...createReviewDto, author: { id: req.user.id } }
+    const cleanContent = this.sanitizerService.clean(createReviewDto.content)
 
-    const cleanContent = this.sanitizerService.clean(data.content)
+    let review = this.reviewRepository.create({
+      ...createReviewDto,
+      content: cleanContent,
+      author: { id: req.user.id }
+    })
 
-    data = { ...createReviewDto, author: { id: req.user.id }, content: cleanContent }
-
-    const review = this.reviewRepository.create(data)
+    review = this.reviewRepository.create(review)
 
     const savedReview = await this.reviewRepository.save(review)
 
@@ -33,7 +34,7 @@ export class ReviewService {
     })
 
     if (!reviewWithAuthorData) {
-      throw new InternalServerErrorException('Review couldn\'t be found.')
+      throw new NotFoundException('Review couldn\'t be found.')
     }
 
     return reviewWithAuthorData
@@ -44,10 +45,6 @@ export class ReviewService {
       relations: ['author']
     })
 
-    if (!data) {
-      throw new InternalServerErrorException('Reviews couldn\'t be retrieved.')
-    }
-
     return data
   }
 
@@ -55,7 +52,7 @@ export class ReviewService {
     const data = await this.reviewRepository.findOne({ where: { id }})
 
     if (!data) {
-      throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+      throw new NotFoundException('Review couldn\'t be retrieved.')
     }
 
     return data
@@ -65,7 +62,7 @@ export class ReviewService {
     const review = await this.reviewRepository.findOne({ where: { id }, relations: ['author']})
 
      if (!review) {
-      throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+      throw new NotFoundException('Review couldn\'t be retrieved.')
     }
 
     if (review.author.id !== req.user.id) {
@@ -77,11 +74,15 @@ export class ReviewService {
     return this.reviewRepository.save(review)
   }
 
-  async remove(id: string): Promise<Review> {
-    const review = await this.reviewRepository.findOne({ where: { id } })
+  async remove(id: string, req: AuthenticatedRequest): Promise<Review> {
+    const review = await this.reviewRepository.findOne({ where: { id }, relations: ['author'] })
 
     if (!review) {
-      throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+      throw new NotFoundException('Review couldn\'t be retrieved.')
+    }
+
+    if (review.author.id !== req.user.id) {
+      throw new ForbiddenException('You are not allowed to delete this review.')
     }
 
     await this.reviewRepository.remove(review)

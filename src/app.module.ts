@@ -14,7 +14,7 @@ import { AuthModule } from './auth/auth.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false },
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
     }),
     AdminModule,

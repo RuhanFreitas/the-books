@@ -42,7 +42,7 @@ export class ReviewController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewService.remove(id)
+  remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.reviewService.remove(id, req)
   }
 }
