@@ -18,7 +18,7 @@ export class CreateReviewDto {
     @IsString()
     @IsNotEmpty()
     @Min(3)
-    description: string
+    summary: string
 
     @IsNumber()
     @IsIn([1, 2, 3, 4, 5])
