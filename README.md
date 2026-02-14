@@ -1,98 +1,381 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📚 The Books
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A RESTful API for managing book reviews, built with **NestJS**, **TypeORM**, and **PostgreSQL**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This project provides:
 
-## Description
+- Admin registration and authentication (JWT-based)
+- Secure review creation and management
+- HTML sanitization for user-generated content
+- Modular and scalable architecture
+- Clean separation of concerns
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+# 🚀 Tech Stack
 
-```bash
-$ npm install
+- **Framework:** NestJS
+- **Language:** TypeScript
+- **ORM:** TypeORM
+- **Database:** PostgreSQL
+- **Authentication:** JWT + Passport
+- **Validation:** class-validator
+- **Hashing:** bcryptjs
+- **Sanitization:** sanitize-html
+- **Configuration:** @nestjs/config
+
+---
+
+# 🏗️ Architecture
+
+The application follows a modular architecture:
+
+```
+src/
+│
+├── main.ts
+├── app.module.ts
+│
+├── admin/
+├── auth/
+├── review/
+└── common/
 ```
 
-## Compile and run the project
+Each module encapsulates:
 
-```bash
-# development
-$ npm run start
+- Controller
+- Service
+- DTOs
+- Entity (when applicable)
 
-# watch mode
-$ npm run start:dev
+This structure ensures scalability, testability, and separation of concerns.
 
-# production mode
-$ npm run start:prod
+---
+
+# 🧩 Modules
+
+---
+
+## 👤 Admin Module
+
+Responsible for administrator management.
+
+### Entity: `Admin`
+
+| Field      | Type   | Description |
+|------------|--------|------------|
+| id         | uuid   | Primary key |
+| firstName  | string | Admin first name |
+| lastName   | string | Admin last name |
+| email      | string | Unique email |
+| password   | string | Hashed password |
+| reviews    | relation | OneToMany → Review |
+| createdAt  | date   | Creation timestamp |
+| updatedAt  | date   | Update timestamp |
+
+---
+
+### Routes
+
+#### `POST /admin`
+
+Creates a new admin.
+
+**Body**
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@email.com",
+  "password": "123456"
+}
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+**Response**
+```json
+{
+  "id": "uuid",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@email.com"
+}
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+#### `GET /admin`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Returns the authenticated admin profile.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+🔐 Requires JWT
+
+Header:
+```
+Authorization: Bearer <token>
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 🔐 Auth Module
 
-Check out a few resources that may come in handy when working with NestJS:
+Handles login and registration.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### JWT Configuration
 
-## Support
+- Signed with `JWT_SECRET`
+- Expiration: 1 day
+- Extracted from `Authorization: Bearer <token>`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+### Routes
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### `POST /auth/register`
 
-## License
+Registers a new admin and returns a token.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Body**
+```json
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "email": "jane@email.com",
+  "password": "password123"
+}
+```
+
+**Response**
+```json
+{
+  "accessToken": "jwt_token_here"
+}
+```
+
+---
+
+#### `POST /auth/login`
+
+Authenticates an admin.
+
+**Body**
+```json
+{
+  "email": "jane@email.com",
+  "password": "password123"
+}
+```
+
+**Response**
+```json
+{
+  "accessToken": "jwt_token_here"
+}
+```
+
+---
+
+## 📚 Review Module
+
+Responsible for managing book reviews.
+
+---
+
+### Entity: `Review`
+
+| Field     | Type   | Description |
+|-----------|--------|------------|
+| id        | uuid   | Primary key |
+| title     | string | Review title |
+| category  | string | Book category |
+| content   | string | HTML content (sanitized) |
+| summary   | string | Short description |
+| rating    | number | 1–5 |
+| cover     | string | Image URL |
+| author    | relation | ManyToOne → Admin |
+| createdAt | date   | Creation timestamp |
+| updatedAt | date   | Update timestamp |
+
+---
+
+## Review Routes
+
+---
+
+### `POST /review`
+
+Creates a review.
+
+🔐 Requires JWT
+
+**Body**
+```json
+{
+  "title": "Clean Code",
+  "category": "Software",
+  "content": "<p>Great book</p>",
+  "description": "Short summary",
+  "rating": 5,
+  "cover": "https://example.com/image.jpg"
+}
+```
+
+Behavior:
+- HTML content is sanitized
+- Authenticated admin becomes the author
+
+---
+
+### `GET /review`
+
+Returns all reviews (with author relation).
+
+Public endpoint.
+
+---
+
+### `GET /review/:id`
+
+Returns a single review by ID.
+
+Public endpoint.
+
+---
+
+### `PATCH /review/:id`
+
+Updates a review.
+
+🔐 Requires JWT  
+Only the review owner can update.
+
+Returns `403 Forbidden` if not owner.
+
+---
+
+### `DELETE /review/:id`
+
+Deletes a review.
+
+🔐 Requires JWT
+
+⚠️ Improvement recommended: enforce owner validation before deletion.
+
+---
+
+# 🧰 Common Module
+
+Contains reusable abstractions.
+
+---
+
+## 🔑 Hashing Service
+
+Abstract class: `HashingService`  
+Implementation: `BcryptHashingService`
+
+Uses:
+- bcryptjs
+
+Purpose:
+- Hash passwords
+- Compare passwords securely
+
+---
+
+## 🧼 Sanitizer Service
+
+Abstract class: `SanitizerService`  
+Implementation: `SanitizeHtmlService`
+
+Uses:
+- sanitize-html
+
+Purpose:
+- Clean user-submitted HTML before saving to the database
+
+---
+
+# 🛡 Validation
+
+DTOs use `class-validator` decorators such as:
+
+- `@IsEmail()`
+- `@IsString()`
+- `@IsUrl()`
+- `@IsIn([1,2,3,4,5])`
+- `@Min(3)`
+
+This guarantees input validation before business logic execution.
+
+---
+
+# 🔐 Security
+
+- Passwords hashed with bcrypt
+- JWT authentication
+- Passport strategy
+- Owner validation on update
+- HTML sanitization
+
+---
+
+# 🌎 Environment Variables
+
+Create a `.env` file:
+
+```
+DATABASE_URL=postgres://user:password@localhost:5432/the_books
+JWT_SECRET=super_secret_key
+PORT=3000
+```
+
+---
+
+# ⚙️ Running the Project
+
+### Install dependencies
+```
+npm install
+```
+
+### Development mode
+```
+npm run start:dev
+```
+
+### Production
+```
+npm run build
+npm run start:prod
+```
+
+---
+
+# 📦 Core Dependencies
+
+- @nestjs/common
+- @nestjs/core
+- @nestjs/typeorm
+- @nestjs/jwt
+- passport
+- passport-jwt
+- bcryptjs
+- sanitize-html
+- class-validator
+- typeorm
+- pg
+
+---
+
+# 📌 Final Notes
+
+The Books API demonstrates:
+
+- Clean modular architecture
+- Proper authentication flow
+- Security best practices
+- Abstraction of infrastructure services
+- Scalable backend structure
+
+Built with ❤️ using NestJS
