@@ -1,4 +1,4 @@
-# 📚 The Books
+# The Books
 
 A RESTful API for managing book reviews, built with **NestJS**, **TypeORM**, and **PostgreSQL**.
 
@@ -12,7 +12,7 @@ This project provides:
 
 ---
 
-# 🚀 Tech Stack
+# Tech Stack
 
 - **Framework:** NestJS
 - **Language:** TypeScript
@@ -26,7 +26,7 @@ This project provides:
 
 ---
 
-# 🏗️ Architecture
+# Architecture
 
 The application follows a modular architecture:
 
@@ -53,11 +53,11 @@ This structure ensures scalability, testability, and separation of concerns.
 
 ---
 
-# 🧩 Modules
+# Modules
 
 ---
 
-## 👤 Admin Module
+## Admin Module
 
 Responsible for administrator management.
 
@@ -108,7 +108,7 @@ Creates a new admin.
 
 Returns the authenticated admin profile.
 
-🔐 Requires JWT
+Requires JWT
 
 Header:
 ```
@@ -117,7 +117,7 @@ Authorization: Bearer <token>
 
 ---
 
-## 🔐 Auth Module
+## Auth Module
 
 Handles login and registration.
 
@@ -175,7 +175,7 @@ Authenticates an admin.
 
 ---
 
-## 📚 Review Module
+## Review Module
 
 Responsible for managing book reviews.
 
@@ -206,7 +206,7 @@ Responsible for managing book reviews.
 
 Creates a review.
 
-🔐 Requires JWT
+Requires JWT
 
 **Body**
 ```json
@@ -246,7 +246,7 @@ Public endpoint.
 
 Updates a review.
 
-🔐 Requires JWT  
+Requires JWT  
 Only the review owner can update.
 
 Returns `403 Forbidden` if not owner.
@@ -257,13 +257,11 @@ Returns `403 Forbidden` if not owner.
 
 Deletes a review.
 
-🔐 Requires JWT
-
-⚠️ Improvement recommended: enforce owner validation before deletion.
+Requires JWT
 
 ---
 
-# 🧰 Common Module
+# Common Module
 
 Contains reusable abstractions.
 
@@ -283,7 +281,7 @@ Purpose:
 
 ---
 
-## 🧼 Sanitizer Service
+## Sanitizer Service
 
 Abstract class: `SanitizerService`  
 Implementation: `SanitizeHtmlService`
@@ -296,7 +294,7 @@ Purpose:
 
 ---
 
-# 🛡 Validation
+# Validation
 
 DTOs use `class-validator` decorators such as:
 
@@ -310,7 +308,7 @@ This guarantees input validation before business logic execution.
 
 ---
 
-# 🔐 Security
+# Security
 
 - Passwords hashed with bcrypt
 - JWT authentication
@@ -320,7 +318,7 @@ This guarantees input validation before business logic execution.
 
 ---
 
-# 🌎 Environment Variables
+# Environment Variables
 
 Create a `.env` file:
 
@@ -332,7 +330,7 @@ PORT=3000
 
 ---
 
-# ⚙️ Running the Project
+# Running the Project
 
 ### Install dependencies
 ```
@@ -352,7 +350,7 @@ npm run start:prod
 
 ---
 
-# 📦 Core Dependencies
+# Core Dependencies
 
 - @nestjs/common
 - @nestjs/core
@@ -368,7 +366,7 @@ npm run start:prod
 
 ---
 
-# 📌 Final Notes
+# Final Notes
 
 The Books API demonstrates:
 
@@ -378,4 +376,4 @@ The Books API demonstrates:
 - Abstraction of infrastructure services
 - Scalable backend structure
 
-Built with ❤️ using NestJS
+Built with NestJS
