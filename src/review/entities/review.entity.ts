@@ -16,6 +16,12 @@ export class Review {
     content: string
 
     @Column()
+    summary: string
+
+    @Column()
+    rating: number
+
+    @Column()
     cover: string
 
     @ManyToOne(() => Admin, (admin) => admin.reviews, {
