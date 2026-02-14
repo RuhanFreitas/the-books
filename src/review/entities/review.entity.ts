@@ -15,6 +15,9 @@ export class Review {
     @Column()
     content: string
 
+    @Column()
+    cover: string
+
     @ManyToOne(() => Admin, (admin) => admin.reviews, {
         nullable: false
     })

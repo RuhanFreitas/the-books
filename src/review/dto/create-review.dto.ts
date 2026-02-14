@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Min } from "class-validator";
+import { IsNotEmpty, IsString, IsUrl, Min } from "class-validator";
 
 export class CreateReviewDto {
     @IsString()
@@ -14,4 +14,9 @@ export class CreateReviewDto {
     @IsNotEmpty()
     @Min(3)
     content: string
+
+    @IsString()
+    @IsUrl()
+    @IsNotEmpty()
+    cover: string
 }

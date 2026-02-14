@@ -7,6 +7,7 @@ export class ReviewResponseDto {
     title: string
     category: string
     content: string
+    cover: string
     author: Admin
     createdAt: Date 
 
@@ -15,6 +16,7 @@ export class ReviewResponseDto {
         this.title = review.title,
         this.category = review.category,
         this.content = review.content,
+        this.cover = review.cover,
         this.author = review.author,
         this.createdAt = review.createdAt
     }
