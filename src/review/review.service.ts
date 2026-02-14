@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { UpdateReviewDto } from './dto/update-review.dto'
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { Review } from './entities/review.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticatedRequest } from 'src/auth/types/authenticated-request.type';
 import { SanitizerService } from 'src/common/sanitizer/sanitizer.service';
+import { Admin } from 'src/admin/entities/admin.entity';
 
 @Injectable()
 export class ReviewService {
@@ -60,11 +61,15 @@ export class ReviewService {
     return data
   }
 
-  async update(id: string, updateReviewDto: UpdateReviewDto): Promise<Review> {
-    const review = await this.reviewRepository.findOne({ where: { id }})
+  async update(id: string, updateReviewDto: UpdateReviewDto, req: AuthenticatedRequest): Promise<Review> {
+    const review = await this.reviewRepository.findOne({ where: { id }, relations: ['author']})
 
      if (!review) {
       throw new InternalServerErrorException('Review couldn\'t be retrieved.')
+    }
+
+    if (review.author.id !== req.user.id) {
+       throw new ForbiddenException('You are not allowed to update this review.')
     }
 
     Object.assign(review, updateReviewDto)
