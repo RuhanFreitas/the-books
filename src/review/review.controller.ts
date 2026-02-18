@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, ParseUUIDPipe } from '@nestjs/common'
 import { ReviewService } from './review.service'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { UpdateReviewDto } from './dto/update-review.dto'
@@ -12,21 +12,21 @@ export class ReviewController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createReviewDto: CreateReviewDto, @Req() req: AuthenticatedRequest) {
+  async create(@Body() createReviewDto: CreateReviewDto, @Req() req: AuthenticatedRequest): Promise<ReviewResponseDto> {
     const review = await this.reviewService.create(createReviewDto, req)
 
     return new ReviewResponseDto(review)
   }
 
   @Get() 
-  async findAll() {
+  async findAll(): Promise<ReviewResponseDto[]> {
     const reviews = await this.reviewService.findAll()
 
     return reviews.map((review) => new ReviewResponseDto(review))
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) { 
+  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ReviewResponseDto> { 
     const review = await this.reviewService.findOne(id)
 
     return new ReviewResponseDto(review)
@@ -34,7 +34,7 @@ export class ReviewController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto, @Req() req: AuthenticatedRequest) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateReviewDto: UpdateReviewDto, @Req() req: AuthenticatedRequest): Promise<ReviewResponseDto> {
     const updatedReview = await this.reviewService.update(id, updateReviewDto, req)  
 
     return new ReviewResponseDto(updatedReview)
@@ -42,7 +42,9 @@ export class ReviewController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
-    return this.reviewService.remove(id, req)
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: AuthenticatedRequest): Promise<ReviewResponseDto> {
+    const deletedReview = await this.reviewService.remove(id, req)
+
+    return new ReviewResponseDto(deletedReview)
   }
 }
