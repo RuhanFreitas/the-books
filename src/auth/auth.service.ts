@@ -7,9 +7,10 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 
 @Injectable()
 export class AuthService {
+
   constructor(
     private readonly hashingService: HashingService,
-    private readonly adminService: AdminService,
+    private readonly adminService: AdminService, 
     private readonly jwtService: JwtService
   ) {}
   
@@ -37,6 +38,7 @@ export class AuthService {
   }
 
   async register(registerAuthDo: RegisterAuthDto) {
+
     const admin = await this.adminService.create(registerAuthDo)
 
     const payload = { sub: admin.id, email: admin.email }

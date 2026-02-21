@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { UpdateReviewDto } from './dto/update-review.dto'
 import { Repository } from 'typeorm';
@@ -16,6 +16,8 @@ export class ReviewService {
   ) {}
 
   async create(createReviewDto: CreateReviewDto, req: AuthenticatedRequest): Promise<Review> {
+    const adminId = req.user.id
+
     const cleanContent = this.sanitizerService.clean(createReviewDto.content)
 
     let review = this.reviewRepository.create({
