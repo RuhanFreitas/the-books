@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { UpdateReviewDto } from './dto/update-review.dto'
 import { Repository } from 'typeorm';
@@ -6,23 +6,27 @@ import { Review } from './entities/review.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticatedRequest } from 'src/auth/types/authenticated-request.type';
 import { SanitizerService } from 'src/common/sanitizer/sanitizer.service';
+import { AiService } from 'src/ai/ai.service';
 
 @Injectable()
 export class ReviewService {
   constructor(
     @InjectRepository(Review)
     private readonly reviewRepository: Repository<Review>,
-    private readonly sanitizerService: SanitizerService
+    private readonly sanitizerService: SanitizerService,
+    private readonly aiService: AiService,
   ) {}
 
   async create(createReviewDto: CreateReviewDto, req: AuthenticatedRequest): Promise<Review> {
-    const adminId = req.user.id
-
     const cleanContent = this.sanitizerService.clean(createReviewDto.content)
+
+    const response = await this.aiService.translateReview(cleanContent)
 
     let review = this.reviewRepository.create({
       ...createReviewDto,
-      content: cleanContent,
+      content_pt: cleanContent,
+      content_en: response.en,
+      content_fr: response.fr,
       author: { id: req.user.id }
     })
 
@@ -61,19 +65,36 @@ export class ReviewService {
   }
 
   async update(id: string, updateReviewDto: UpdateReviewDto, req: AuthenticatedRequest): Promise<Review> {
-    const review = await this.reviewRepository.findOne({ where: { id }, relations: ['author']})
+    const review = await this.reviewRepository.findOne({
+    where: { id },
+    relations: ['author'],
+  });
 
-     if (!review) {
-      throw new NotFoundException('Review couldn\'t be retrieved.')
-    }
+  if (!review) {
+    throw new NotFoundException('Review couldn\'t be retrieved.');
+  }
 
-    if (review.author.id !== req.user.id) {
-       throw new ForbiddenException('You are not allowed to update this review.')
-    }
+  if (review.author.id !== req.user.id) {
+    throw new ForbiddenException(
+      'You are not allowed to update this review.',
+    );
+  }
 
-    Object.assign(review, updateReviewDto)
+  if (!updateReviewDto.content) {
+    throw new BadRequestException('Content is missing.');
+  }
 
-    return this.reviewRepository.save(review)
+  const cleanContent = this.sanitizerService.clean(
+    updateReviewDto.content,
+  );
+
+  const translations = await this.aiService.translateReview(cleanContent);
+
+  review.content_pt = cleanContent;
+  review.content_en = translations.en;
+  review.content_fr = translations.fr;
+
+  return this.reviewRepository.save(review);
   }
 
   async remove(id: string, req: AuthenticatedRequest): Promise<Review> {

@@ -1,9 +1,9 @@
-import { IsIn, IsNotEmpty, IsNumber, IsString, IsUrl, Max, Min } from "class-validator";
+import { IsIn, IsNotEmpty, IsNumber, IsString, IsUrl, MinLength } from "class-validator";
 
 export class CreateReviewDto {
     @IsString()
     @IsNotEmpty()
-    @Min(3)
+    @MinLength(3)
     title: string
 
     @IsString()
@@ -12,12 +12,12 @@ export class CreateReviewDto {
 
     @IsString()
     @IsNotEmpty()
-    @Min(3)
+    @MinLength(3)
     content: string
 
     @IsString()
     @IsNotEmpty()
-    @Min(3)
+    @MinLength(3)
     summary: string
 
     @IsNumber()

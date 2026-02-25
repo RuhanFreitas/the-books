@@ -4,6 +4,7 @@ import { ReviewModule } from './review/review.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config'
 import { AuthModule } from './auth/auth.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -14,12 +15,13 @@ import { AuthModule } from './auth/auth.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false },
-      synchronize: false,
+      synchronize: true,
       autoLoadEntities: true,
     }),
     AdminModule,
     ReviewModule,
     AuthModule,
+    AiModule,
   ],
   controllers: [],
   providers: [],

@@ -13,7 +13,13 @@ export class Review {
     category: string
 
     @Column()
-    content: string
+    content_pt: string
+
+    @Column()
+    content_en: string
+
+    @Column()
+    content_fr: string
 
     @Column()
     summary: string
